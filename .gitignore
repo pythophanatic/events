@@ -2,3 +2,4 @@ venv/
 .mypy_cache/
 .idea/
 message.db
+__pycache__/
