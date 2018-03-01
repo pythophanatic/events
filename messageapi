@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+# coding=utf-8
+"""
+This program is setting up a small api which handles messages for message_db
+"""
+import argparse
+from flask import Flask, request
+from apiutils import Response, ApiFunctions
+
+app = Flask(__name__)
+api = ApiFunctions()
+
+
+@app.route('/messages', methods=['POST'])
+def message_request():
+    """
+    Handles a message request.
+
+    :return: json formatted string with at least status and message, status can be ok or fail
+    """
+    if request.method == "POST":
+        return api.process_message(request)
+
+
+@app.errorhandler(405)
+def page_not_found(e):
+    """
+    Custom 405 error response
+    :return: fail response
+    """
+    return Response().fail("405 Method Not Allowed")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """
+    Custom 404 error response
+    :return: fail response
+    """
+    return Response().fail("404 Not Found")
+
+
+def get_args():
+    """
+    Parse the needed arguments to run the api server
+    :return: args
+    """
+    default_port = 8080
+    default_bind_address = "0.0.0.0"
+    parser = argparse.ArgumentParser(description='Run a MessageDB API Server', prog='messageapi')
+    parser.add_argument('-p', '--port', type=int, help='Port the API listens on (Default: ' + str(default_port) + ')',
+                        metavar='PORT', default=default_port)
+    parser.add_argument('-b', '--bind',
+                        help='Address you want to bind the service on (Default: ' + default_bind_address + ')',
+                        metavar='IP', default=default_bind_address)
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = get_args()
+    app.run(host=args.bind, port=args.port)
